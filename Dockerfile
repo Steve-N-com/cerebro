@@ -1,6 +1,12 @@
-# Build the Play application and its distribution.
-FROM sbtscala/scala-sbt:1.4.5 AS build
+# Build with the project's pinned sbt version on Java 11.
+FROM eclipse-temurin:11-jdk AS build
 WORKDIR /src
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends bash curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -fsSL https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt -o /usr/local/bin/sbt \
+    && chmod +x /usr/local/bin/sbt
 
 COPY . .
 RUN sbt clean stage
