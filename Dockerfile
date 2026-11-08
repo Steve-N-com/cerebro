@@ -1,6 +1,10 @@
-# Build with the project's pinned sbt version on Java 11.
-FROM eclipse-temurin:11-jdk AS build
+# Compile once on the native builder architecture; the staged Play app is
+# architecture-independent and is copied into each target runtime image.
+FROM --platform=$BUILDPLATFORM eclipse-temurin:11-jdk AS build
 WORKDIR /src
+
+# Avoid JVMCI/Graal JIT compilation failures seen while compiling Scala 2.13.4.
+ENV JAVA_TOOL_OPTIONS="-XX:-UseJVMCICompiler"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends bash curl ca-certificates \
@@ -11,7 +15,7 @@ RUN apt-get update \
 COPY . .
 RUN sbt clean stage
 
-# Keep the runtime image small and run the service without root privileges.
+# Runtime stage follows the requested target platform (amd64 or arm64).
 FROM eclipse-temurin:11-jre
 ENV CEREBRO_PORT=9000
 WORKDIR /var/lib/cerebro
