@@ -3,8 +3,9 @@
 FROM --platform=$BUILDPLATFORM eclipse-temurin:11-jdk AS build
 WORKDIR /src
 
-# Avoid JVMCI/Graal JIT compilation failures seen while compiling Scala 2.13.4.
-ENV JAVA_TOOL_OPTIONS="-XX:+UnlockExperimentalVMOptions -XX:-UseJVMCICompiler"
+# Run the legacy Scala 2.13.4 build without JIT compilation. This avoids
+# JVMCI/Graal compiler assertion failures observed on the Java 11 builder.
+ENV JAVA_TOOL_OPTIONS="-Xint"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends bash curl ca-certificates \
