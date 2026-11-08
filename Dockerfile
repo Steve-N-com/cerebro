@@ -17,12 +17,18 @@ RUN sbt clean stage
 
 # Runtime stage follows the requested target platform (amd64 or arm64).
 FROM eclipse-temurin:11-jre
-ENV JAVA_HOME=/opt/java/openjdk \
-    PATH="/opt/java/openjdk/bin:${PATH}" \
+# The generated sbt-native-packager launcher also probes the conventional
+# /usr/lib/jvm location when discovering Java installations.
+ENV JAVA_HOME=/usr/lib/jvm/default-java \
+    PATH="/usr/lib/jvm/default-java/bin:${PATH}" \
     CEREBRO_PORT=9000
 WORKDIR /var/lib/cerebro
 
-RUN groupadd --system --gid 10001 cerebro \
+RUN mkdir -p /usr/lib/jvm \
+    && ln -sfn /opt/java/openjdk /usr/lib/jvm/default-java \
+    && test -x "${JAVA_HOME}/bin/java" \
+    && "${JAVA_HOME}/bin/java" -version \
+    && groupadd --system --gid 10001 cerebro \
     && useradd --system --uid 10001 --gid cerebro --home-dir /var/lib/cerebro cerebro \
     && mkdir -p /opt/cerebro /var/lib/cerebro \
     && chown -R cerebro:cerebro /opt/cerebro /var/lib/cerebro
