@@ -42,5 +42,5 @@ USER cerebro
 EXPOSE 9000
 VOLUME ["/var/lib/cerebro"]
 
-ENTRYPOINT ["/opt/cerebro/bin/cerebro"]
+ENTRYPOINT ["/opt/cerebro/bin/cerebro", "-java-home", "/usr/lib/jvm/default-java"]
 CMD ["-Dhttp.address=0.0.0.0"]
