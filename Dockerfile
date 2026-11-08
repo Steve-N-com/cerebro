@@ -13,7 +13,9 @@ RUN apt-get update \
     && chmod +x /usr/local/bin/sbt
 
 COPY . .
-RUN sbt clean stage
+RUN sbt clean stage \
+    && echo '--- generated cerebro launcher: Java detection ---' \
+    && grep -n -C 8 -E 'No java installations|JAVA_HOME|javaHome|java_cmd|java_opts|java executable' target/universal/stage/bin/cerebro || true
 
 # Runtime stage follows the requested target platform (amd64 or arm64).
 FROM eclipse-temurin:11-jre
